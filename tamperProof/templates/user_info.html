@@ -1,0 +1,83 @@
+{% load my_filter %}
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta charset="utf-8">
+		<meta name="author" content="zyl">
+		<link rel="stylesheet" type="text/css" href="{% static 'master/css/bootstrap.min.css' %}"/> 
+		<link rel="stylesheet" type="text/css" href="{% static 'master/css/bootstrap-theme.min.cs' %}"/>
+		<link rel="stylesheet" type="text/css" href="{% static 'master/css/my.css' %}"/>
+		
+		<script src= "{% static 'master/js/jquery-1.11.3.min.js' %}"></script>
+		<script src= "{% static 'master/js/bootstrap.min.js' %}"></script>
+    </head>
+    <body>
+		<title>用户管理</title>
+		<!-- Fixed navbar -->
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li class="dropdown">
+                            <a aria-expanded="false" aria-haspopup="true" role="button" data-toggle="dropdown" class="dropdown-toggle">系统管理 <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="/users">用户管理</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div><!--/.nav-collapse -->
+            </div>
+        </nav>
+        <div class="col-md-offset-10 col-md-2">
+            <a href="/adduser" class="btn btn-primary" role="button">增加用户</a>
+        </div>
+
+
+        <form class="form-horizontal"  method="POST" action="/deleteusers/">{% csrf_token %}
+            <div class="page-header">
+                <h3>
+                    用户列表 <button type="submit" class="btn btn-primary">删除所选用户</button>
+                </h3>
+
+            </div>
+            <div id="userlist">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th>用户名</th>
+                        <th>身份</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td class="action-checkbox">
+                                <input type="checkbox" value={{user.id}} name="selected_user_id">
+                            </td>
+                            <td>{{user.username}}</td>
+                            <td>{{ user|get_group_name }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+
+
+<!--		
+		<ul class="pager">
+			{% if users.has_previous %}
+			<li><button type="button" class="btn btn-primary btn-xs" id= "pre" title={{ users.previous_page_number }}>上一页</button></li>
+			{% endif %}
+			<label>{{ users.number }} / {{ users.paginator.num_pages }} 页</label>
+			{% if users.has_next %}
+			<li><button type="button" class="btn btn-primary btn-xs" id= "next" title={{ users.next_page_number }}>下一页</button></li>
+			{% endif %}          
+		</ul>
+-->		
+    </body>
+</html>

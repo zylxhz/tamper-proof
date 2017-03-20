@@ -1,0 +1,42 @@
+body{
+    padding-top: 70px;
+}
+
+
+#condition{
+   border-bottom: 1px solid #ddd;
+   padding: 20px 8px 0px;
+   text-align: left;
+}
+
+.btn-primary{
+    background-color: #397171;
+    border: 1px solid #397171;
+    color:  #fff;
+    text-shadow: none;
+}
+.first{
+    background-color: #397171;
+    border: 1px solid #397171;
+    height:50px;
+    width : 100%;
+}
+
+table, th, tr, td{
+   border: 1px solid gray;
+   text-align:center;
+}
+
+.pagination{
+  width: 20%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#userlist{
+    width:90%;
+    margin-left:auto;
+    margin-right:auto;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
