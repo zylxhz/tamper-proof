@@ -1,6 +1,7 @@
 # coding=utf-8
 from django.shortcuts import render_to_response
 from django.http.response import HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect
 from django.template.loader import get_template
 from django.template import RequestContext
 from django.template.context import Context
@@ -103,62 +104,19 @@ def select_system(request):
 
 #显示增加节点页面
 def add_node(request):
-    print 'add node'
+    logger.info(u'增加节点')
     try:
         cur_system = request.GET.get('system')
         request.session['system'] = cur_system
         cur_system = request.session.get('system')
-        print cur_system
     except:
         cur_system = request.session.get('system')
-        print cur_system
     logger.info(u'选择的系统是:' + cur_system)
     request.session['node_list'] = []
     t = get_template('add_node.html')
     c = RequestContext(request)
     html = t.render(c)
     return HttpResponse(html)
-
-# #登陆节点并获取目录信息
-# @csrf_exempt
-# def set_root_directory(request):
-#     logger.info(u'设定监控根目录')
-#     if request.method == 'POST':
-#         form = NodeForm(request.POST)
-#         if form.is_valid():
-#             logger.info('NodeForm is valid')
-#             data = form.cleaned_data
-#             ip = data['ip']
-#             port = data['port']
-#             username = data['username']
-#             password = data['password']
-#             logger.info('ip: ' + ip + ' , port: ' + port +  ' , username: ' + username + ' , password: ' + password)
-#
-#             return HttpResponseRedirect('/filetree/')
-#
-#     else:
-#         form = NodeForm()
-#     return render_to_response('add_node.html', {'form': form})
-
-# #处理用户增加监控节点的请求
-# @csrf_exempt
-# def process_add_node(request):
-#     logger.info(u'处理增加节点请求')
-#     if request.method == 'POST':
-#         form = NodeForm(request.POST)
-#         if form.is_valid():
-#             logger.info('NodeForm is valid')
-#             data = form.cleaned_data
-#             ip = data['ip']
-#             port = data['port']
-#             username = data['username']
-#             password = data['password']
-#             root = data['root']
-#             logger.info('ip: ' + ip + ' , port: ' + port +  ' , username: ' + username + ' , password: ' + password + ' , root: ' + root)
-#             proxy = SSHProxy(ip, port, username, password)
-#             result = proxy.test()
-#             logger.info('connection test result : ' + result)
-#             if result == True:
 
 #处理用户增加监控节点的请求
 @csrf_exempt
@@ -205,3 +163,24 @@ def get_sub(request):
     proxy.get_sub(path, data)
     logger.info(data)
     return HttpResponse(json.dumps(data), content_type='application/json')
+
+#设置根目录
+def set_root(request):
+    logger.info(u'设置根目录')
+    path = request.GET.get('path')
+    node = request.session['node']
+    node['root'] = path
+    request.session['node'] = node
+    return HttpResponseRedirect('/selectskipdirs/')
+
+#选择无需监控的目录
+def select_skip_dirs(request):
+    logger.info(u'选择无需监控的目录')
+    node = request.session['node']
+    root_dir = node['root']
+    context = {'root_dir' : root_dir}
+    print root_dir
+    t = get_template('select_skip_dirs.html')
+    html = t.render(context)
+    return HttpResponse(html)
+

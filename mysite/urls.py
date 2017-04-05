@@ -29,4 +29,6 @@ urlpatterns = [
     url(r'processaddnode/', views.process_add_node),
     url(r'selectroot/', views.select_root),
     url(r'getsub/', views.get_sub),
+    url(r'setroot/', views.set_root),
+    url(r'selectskipdirs/', views.select_skip_dirs),
 ]
