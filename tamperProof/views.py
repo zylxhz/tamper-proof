@@ -7,13 +7,12 @@ from django.template import RequestContext
 from django.template.context import Context
 from django.views.decorators.csrf import csrf_exempt
 from .forms import UserForm, NodeForm, PathForm
-from .models import System
+from .models import System, Node
 from django.contrib.auth.models import Group,User
 from .sshproxy import SSHProxy
 import logging
 import os
 import time
-import paramiko
 import json
 
 #日志根目录
@@ -182,5 +181,40 @@ def select_skip_dirs(request):
     print root_dir
     t = get_template('select_skip_dirs.html')
     html = t.render(context)
+    return HttpResponse(html)
+
+#所有需要监控的目录需要计算MD5（对于文件是md5，对于文件夹是文件的数量）
+@csrf_exempt
+def process_skip_dirs(request):
+    logger.info(u'处理需要跳过的目录')
+    if request.method == 'POST':
+        logger.info('request is post')
+        form = PathForm(request.POST)
+        if form.is_valid():
+            logger.info('PathForm is valid')
+            data = form.cleaned_data
+            paths = data['paths']
+            node = request.session['node']
+            root_dir = node['root']
+            ip = node['ip']
+            port = node['port']
+            username = node['username']
+            password = node['password']
+            node_instance = Node(system=request.session.get('system'), ip=ip, port=port, username=username, password=password, root_path=root_dir, skip_paths=paths)
+            node_instance.save()
+            proxy = SSHProxy(logger)
+            proxy.connect(ip, port, username, password)
+            logger.info(u'开始准备监控')
+            skip_dirs = paths.split(' ')
+            proxy.prepare_monitor(ip, root_dir, skip_dirs)
+            return HttpResponseRedirect('/nodemonitorpreparesuccess/')
+    else:
+        return HttpResponseRedirect('/selectskipdirs/')
+
+#针对单个节点的监控已准备就绪
+def node_monitor_prepare_success(request):
+    logger.info(u'针对单个节点的监控已准备就绪')
+    t = get_template('node_monitor_prepare_success.html')
+    html = t.render(Context())
     return HttpResponse(html)
 

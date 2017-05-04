@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+{% load staticfiles %}
+<html>
+<head>
+    <title>选择无需监控的目录</title>
+    <meta name="author" content="zyl">
+    <link rel="stylesheet" type="text/css" href="{% static 'master/css/bootstrap.min.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'master/css/bootstrap-theme.min.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'master/css/skin-win8/ui.fancytree.min.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'master/css/my.css' %}"/>
+
+    <script src= "{% static 'master/js/jquery-1.11.3.min.js' %}"></script>
+    <script src= "{% static 'master/js/bootstrap.min.js' %}"></script>
+    <script src= "{% static 'master/js/jquery-ui.custom.js' %}"></script>
+    <script src= "{% static 'master/js/jquery.fancytree-all.min.js' %}"></script>
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a aria-expanded="false" aria-haspopup="true" role="button" data-toggle="dropdown" class="dropdown-toggle">系统管理 <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="/users">用户管理</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a aria-expanded="false" aria-haspopup="true" role="button" data-toggle="dropdown" class="dropdown-toggle">任务管理 <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="/selectsystem">新增任务</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a aria-expanded="false" aria-haspopup="true" role="button" data-toggle="dropdown" class="dropdown-toggle">监控 <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="/monitor">监控</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav><!--/.nav-collapse -->
+    <div class="page-header">
+        <h3>选择无需监控的目录</h3>
+    </div>
+    <form id="form" class="form-horizontal"  method="POST" action="/processskipdirs/">{% csrf_token %}
+        <div class="form-group">
+            <label for="paths" class="col-md-2 control-label">选择取消监控的目录包括: </label>
+            <div class="col-md-8">
+                <textarea name="paths" id="paths" readonly="true"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <button type="submit" class="btn btn-primary">下一步</button>
+            </div>
+        </div>
+    </form>
+    {% for field in form %}
+    <div class="fieldWrapper">
+        {{ field.errors }}
+        {{ field.label_tag }} {{ field }}
+    </div>
+    {% endfor %}
+    <div id="tree"></div>
+
+
+    <script type="application/javascript">
+        var root_dir = "{{ root_dir }}";
+        var tmp_list = root_dir.split("/")
+        var cur_dir = tmp_list.pop()
+        var file_tree = [{"title": cur_dir, "folder": true}];
+        $(function() {
+            $("#tree").fancytree({
+                checkbox: true,
+                selectMode: 2,
+                source: file_tree,
+                select: function (event, data) {
+                    //获得选择的节点集合
+                    var selNodes = data.tree.getSelectedNodes();
+                    // convert to title/key array
+                    var setPaths = $.map(selNodes, function(node){
+                        var parent_list = node.getParentList(false, true);
+                        var path = root_dir;
+                        for (var i = 1; i < parent_list.length; i++) {
+                            path += "/";
+                            path += parent_list[i].title;
+                        }
+                        if (path == "") {
+                            path = "/"
+                        }
+                        return path;
+                    });
+                    $("#paths").text(setPaths.join(" "));
+                },
+                dblclick: function (event, data) {
+//                    只有目录才会打开下一级
+                    if(data.node.folder){
+                        var parent_list = data.node.getParentList(false, true);
+                        var path = root_dir;
+                        for (var i = 1; i < parent_list.length; i++) {
+                            path += "/";
+                            path += parent_list[i].title;
+                        }
+                        if (path == "") {
+                            path = "/"
+                        }
+                        $.get('/getsub', {'path': path}, function (result) {
+                            data.node.fromDict(result);
+                        });
+                    }
+
+                },
+                keydown: function (event, data) {
+                    if (event.which === 32) {
+                        data.node.toggleSelected();
+                        return false;
+                    }
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>

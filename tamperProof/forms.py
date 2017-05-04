@@ -15,4 +15,4 @@ class NodeForm(forms.Form):
 
 
 class PathForm(forms.Form):
-    path = forms.CharField()
+    paths = forms.CharField(widget=forms.Textarea)

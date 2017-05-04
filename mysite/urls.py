@@ -31,4 +31,6 @@ urlpatterns = [
     url(r'getsub/', views.get_sub),
     url(r'setroot/', views.set_root),
     url(r'selectskipdirs/', views.select_skip_dirs),
+    url(r'processskipdirs/', views.process_skip_dirs),
+    url(r'nodemonitorpreparesuccess/', views.node_monitor_prepare_success),
 ]
